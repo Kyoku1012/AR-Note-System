@@ -13,9 +13,6 @@ public class NoteData
     // 任务状态（Member 2 用）
     public bool isCompleted;
 
-    // 优先级（Member 3 用）
-    public int priorityLevel;
-
     // 颜色标签（Member 3 用）
     public string colorLabel;
 
@@ -29,5 +26,12 @@ public class NoteData
 
     // AR 位置信息（核心）
     public Vector3 worldPosition;
+
+
+    // Member 3 
+    // Note Customization
+    public string colorName;   // e.g. "Yellow", "Pink", "Blue"
+    public string iconId;      // e.g. "Study", "Shopping", "Reminder"
+    public string priorityId;  // e.g. "High", "Medium", "Low"
 
 }
