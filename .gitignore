@@ -105,5 +105,9 @@ InitTestScene*.unity*
 # Auto-generated cache in Assets folder
 /[Aa]ssets/[Ss]ceneDependencyCache*
 
-# Vuforia tgz package
+# Vuforia tgz package / large package files
 *.tgz
+
+# Android signing
+*.keystore
+*.jks
