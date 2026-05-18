@@ -3,8 +3,10 @@ using UnityEngine;
 [System.Serializable]
 public class NoteData
 {
+    public bool isVisible;
+
     // 唯一ID（用于增删改查）
-    public string noteID;
+    public string id;
 
     // 基础文本信息
     public string title;

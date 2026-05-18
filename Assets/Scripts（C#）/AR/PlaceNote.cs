@@ -1,44 +1,7 @@
-// using UnityEngine;
-// using Vuforia;
-
-// public class PlaceNote : MonoBehaviour
-// {
-//     public GameObject notePrefab;
-//     public float yOffset = 0.01f;   // 仅抬高 1cm，避免与平面重叠闪烁
-
-//     private PlaneFinderBehaviour planeFinder;
-
-//     void Start()
-//     {
-//         planeFinder = GetComponent<PlaneFinderBehaviour>();
-//     }
-
-//     void Update()
-//     {
-//         if (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began)
-//         {
-//             planeFinder?.PerformHitTest(Input.GetTouch(0).position);
-//         }
-//     }
-
-//     public void AnchorCreated(HitTestResult result)
-//     {
-//         if (result == null) return;
-
-//         Vector3 position = result.Position;
-//         position.y += yOffset;  // 略微抬高，使其浮在平面表面上
-
-//         // 便签平躺：不旋转（或者只绕 Y 轴设置一个固定方向，例如随机角度）
-//         Quaternion rotation = Quaternion.identity;
-//         // 可选：随机绕 Y 轴旋转，使便签朝向不同方向
-//         // rotation = Quaternion.Euler(0, Random.Range(0, 360), 0);
-
-//         Instantiate(notePrefab, position, rotation);
-//     }
-// }
-
 using UnityEngine;
 using Vuforia;
+using UnityEngine.EventSystems;
+
 
 public class PlaceNote : MonoBehaviour
 {
@@ -52,13 +15,39 @@ public class PlaceNote : MonoBehaviour
         planeFinder = GetComponent<PlaneFinderBehaviour>();
     }
 
+    // void Update()
+    // {
+    //     // 只有当用户点击屏幕时才进行射线检测
+    //     if (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began)
+    //     {
+    //         planeFinder?.PerformHitTest(Input.GetTouch(0).position);
+    //     }
+    // }
+
     void Update()
+{
+    if (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began)
     {
-        // 只有当用户点击屏幕时才进行射线检测
-        if (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began)
+        if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject(Input.GetTouch(0).fingerId))
         {
-            planeFinder?.PerformHitTest(Input.GetTouch(0).position);
+            Debug.Log("Touch is over UI, skip plane hit test.");
+            return;
         }
+
+        planeFinder?.PerformHitTest(Input.GetTouch(0).position);
+    }
+    #if UNITY_EDITOR
+    if (Input.GetMouseButtonDown(0))
+    {
+        if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
+        {
+            Debug.Log("Mouse is over UI, skip plane hit test.");
+            return;
+        }
+
+        planeFinder?.PerformHitTest(Input.mousePosition);
+    }
+    #endif
     }
 
     /// <summary>
@@ -102,5 +91,20 @@ public class PlaceNote : MonoBehaviour
         // 在该旋转下，Vector3.up 是指向平面外部的
         instantiatedNote.transform.localPosition = new Vector3(0, offset, 0); 
         instantiatedNote.transform.localRotation = Quaternion.identity;
+
+        // --- 4. Record the current note in the toolbar for potential future interactions ---
+        NoteStyleManager noteStyle = instantiatedNote.GetComponentInChildren<NoteStyleManager>();
+        StylePanelController stylePanel = FindObjectOfType<StylePanelController>();
+
+        if (stylePanel != null && noteStyle != null)
+        {
+            stylePanel.SetSelectedNote(noteStyle);
+        }
+        else
+        {
+            Debug.LogWarning("StylePanelController or NoteStyleManager not found.");
+        }
+    
+
     }
 }
